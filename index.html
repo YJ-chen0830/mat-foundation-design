@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筏式基礎承載力與沉陷計算 | Mat/Raft Foundation Bearing Capacity and Settlement</title>
+<script src="https://yj-chen0830.github.io/jrh-core/jrh-core.js?v=3" defer></script>
+<style>
+  :root{--navy:#0b1f3a;--navy2:#13284a;--gold:#c9a14a;--gold2:#e0bf6e;--bg:#f5f3ee;--ink:#1c2530;--line:#d8d2c2;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Noto Sans TC","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#f5f3ee;padding:28px 32px;}
+  header h1{margin:0;font-size:22px;}
+  header span{color:var(--gold2);font-size:13px;display:block;margin-top:4px;}
+  main{max-width:1120px;margin:0 auto;padding:28px 20px 60px;}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:24px;}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .card h2{font-size:14.5px;margin:0 0 18px;color:var(--navy);font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--gold);padding-bottom:10px;}
+  .subcard{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
+  .subcard h3{margin:0 0 12px;font-size:13px;color:var(--navy);}
+  label{display:block;font-size:12px;color:#666;margin:10px 0 4px;font-weight:500;}
+  input,select{width:100%;padding:8px 11px;border:1.5px solid var(--line);border-radius:7px;font-size:13.5px;background:#fafaf8;}
+  input:focus,select:focus{outline:none;border-color:var(--gold);}
+  .sec{font-size:12px;font-weight:700;color:var(--navy);margin:16px 0 6px;border-left:4px solid var(--gold);padding-left:9px;letter-spacing:.04em;text-transform:uppercase;}
+  .note{font-size:11.5px;color:#666;margin-top:12px;line-height:1.75;background:#f9f7f2;border-radius:6px;padding:9px 12px;}
+  button.calc-btn{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.calc-btn:hover{background:var(--navy2);}
+  button.pro-btn{margin-top:12px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.pro-btn:hover{filter:brightness(1.08);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:var(--navy);color:#f5f3ee;font-weight:600;font-size:12px;padding:9px 10px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--line);}
+  tr:nth-child(even) td{background:#f9f7f3;}
+  td:last-child{text-align:right;font-weight:700;}
+  .ok{color:#1a7d3a;font-weight:700;}
+  .ng{color:#c0392b;font-weight:700;}
+  .mono{font-family:"Courier New",monospace;}
+  details.proc{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;overflow:hidden;}
+  details.proc summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:13px;color:var(--navy);user-select:none;list-style:none;display:flex;align-items:center;gap:6px;}
+  details.proc summary::before{content:"▶";font-size:10px;transition:transform .2s;}
+  details[open].proc summary::before{transform:rotate(90deg);}
+  details.proc pre{margin:0;padding:12px 16px 16px;font-family:"Courier New",monospace;font-size:11.5px;line-height:1.9;white-space:pre-wrap;color:#2c3e50;border-top:1px solid var(--line);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .proj-section{background:#fff;border:1px solid var(--gold);border-radius:10px;padding:18px 22px;margin-bottom:20px;}
+  .proj-section h3{margin:0 0 12px;color:var(--navy);font-size:14px;font-weight:700;}
+  .proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:600px){.proj-grid,.row2{grid-template-columns:1fr;}}
+  .mob-tabs{display:none;}
+  .inline-check{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:#f9f7f2;border:1px solid var(--line);border-radius:8px;}
+  .inline-check input{width:auto;transform:translateY(1px);}
+  .tag{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#f4ecda;color:var(--navy);}
+  @media screen and (max-width:767px){
+    .mob-tabs{display:flex;background:var(--bg);border-bottom:2px solid var(--line);margin:0 -20px 0;padding:0 20px;}
+    .mob-tab{flex:1;padding:11px 4px;text-align:center;font-size:13.5px;font-weight:700;color:#888;cursor:pointer;background:transparent;border:none;border-bottom:3px solid transparent;}
+    .mob-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+    .grid{display:block;}
+    .grid>.card{display:none;}
+    .grid>.card.mob-active{display:block;}
+  }
+  @media print{
+    header,.no-print{display:none!important;}
+    body{background:#fff;margin:0;font-size:9pt;line-height:1.5;color:#111;}
+    main{padding:0;max-width:100%!important;}
+    .grid{grid-template-columns:1fr!important;gap:10pt!important;}
+    .card{box-shadow:none!important;border:1px solid #ccc!important;border-radius:4pt!important;padding:10pt 12pt!important;break-inside:avoid;}
+    .card h2{font-size:10.5pt!important;padding-bottom:6pt!important;margin-bottom:9pt!important;}
+    .subcard{margin-top:10pt!important;padding-top:8pt!important;}
+    .subcard h3{font-size:9pt!important;}
+    label{font-size:8pt!important;margin:6pt 0 2pt!important;}
+    .sec{font-size:8pt!important;margin:10pt 0 4pt!important;}
+    .note{font-size:7.5pt!important;padding:6pt 9pt!important;}
+    table{border:1px solid #bbb!important;border-radius:0!important;margin-top:6pt!important;}
+    th{font-size:8pt!important;padding:5pt 7pt!important;background:#0b1f3a!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    td{font-size:8.5pt!important;padding:5pt 7pt!important;}
+    tr:nth-child(even) td{background:#f5f5f5!important;}
+    details.proc{display:block!important;margin-top:10pt!important;border:1pt solid #0b1f3a!important;border-radius:4pt!important;break-inside:avoid;background:#f9f9f6!important;}
+    details.proc>summary{display:none!important;}
+    details.proc::before{content:"📋  計算過程（供第三方檢核）";display:block;font-weight:700;font-size:8pt;color:#0b1f3a;padding:6pt 10pt 4pt;border-bottom:1px solid #ccc;letter-spacing:.04em;}
+    details.proc>pre{font-size:7pt!important;line-height:1.65!important;white-space:pre-wrap!important;padding:6pt 10pt 10pt!important;color:#1a1a1a!important;font-family:"Courier New",monospace!important;}
+    .proj-section{border:1.5pt solid #0b1f3a!important;border-radius:4pt!important;}
+    button.pro-btn,button.calc-btn{display:none!important;}
+    @page{margin:15mm 12mm;size:A4;}
+  }
+</style>
+</head>
+<body data-tool="mfd">
+<header>
+  <a href="https://yj-chen0830.github.io/engineering-hub/" style="color:var(--gold2);font-size:12.5px;text-decoration:none;display:inline-block;margin-bottom:8px;">← 返回工程計算中心</a>
+  <h1>🏢 筏式基礎承載力與沉陷計算 (Mat/Raft Foundation)</h1>
+  <span>淨壓力法承載力檢核 + 彈性沉陷影響係數法，適用大面積筏式/版式基礎初步設計</span>
+</header>
+<main>
+
+<div class="proj-section no-print" id="projSection">
+  <h3>📁 專案資訊（列印時帶入計算書封面）</h3>
+  <div class="proj-grid">
+    <div><label>工程名稱</label><input id="pj-name" placeholder="○○工程"></div>
+    <div><label>工程地點</label><input id="pj-loc" placeholder="○○市○○區"></div>
+    <div><label>承造廠商</label><input id="pj-contractor" placeholder="○○營造股份有限公司"></div>
+    <div><label>文件編號</label><input id="pj-docno" placeholder="MFD-CAL-001"></div>
+    <div><label>計算者</label><input id="pj-calc" placeholder="姓名"></div>
+    <div><label>審核者</label><input id="pj-review" placeholder="姓名"></div>
+    <div><label>計算日期</label><input id="pj-date" type="date"></div>
+  </div>
+</div>
+
+<div class="mob-tabs">
+  <button class="mob-tab active" onclick="switchMobTab('mfd-in',this)">📋 輸入參數</button>
+  <button class="mob-tab" id="mobTab-mfd-r" onclick="switchMobTab('mfd-r',this)">📊 計算結果</button>
+</div>
+
+<div class="grid">
+  <div class="card mob-active" data-tab="mfd-in">
+    <h2>筏基與土層輸入</h2>
+
+    <div class="sec">幾何與荷重</div>
+    <div class="row2">
+      <div><label>筏基長度 L (m)</label><input id="mfd-L" type="number" value="20" step="0.1" min="1"></div>
+      <div><label>筏基寬度 B (m)</label><input id="mfd-B" type="number" value="15" step="0.1" min="1"></div>
+    </div>
+    <div class="row2">
+      <div><label>埋置深度 Df (m)</label><input id="mfd-Df" type="number" value="3" step="0.1" min="0"></div>
+      <div><label>總荷重 Q (kN)</label><input id="mfd-Q" type="number" value="45000" step="100" min="0"></div>
+    </div>
+
+    <div class="sec">承載力參數</div>
+    <div class="row2">
+      <div><label>土壤單位重 γ (kN/m³)</label><input id="mfd-gamma" type="number" value="18" step="0.1" min="0"></div>
+      <div><label>凝聚力 c (kPa)</label><input id="mfd-c" type="number" value="5" step="0.1" min="0"></div>
+    </div>
+    <div class="row2">
+      <div><label>摩擦角 φ (度)</label><input id="mfd-phi" type="number" value="28" step="0.1" min="0" max="50"></div>
+      <div><label>形狀係數模式</label>
+        <select id="mfd-shapeMode">
+          <option value="auto" selected>φ&gt;10°時自動採用簡化形狀係數</option>
+          <option value="on">一律採用簡化形狀係數</option>
+          <option value="off">一律視為條形基礎（形狀係數=1）</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sec">沉陷參數</div>
+    <div class="row2">
+      <div><label>土壤變形模數 Es (MPa)</label><input id="mfd-Es" type="number" value="25" step="0.1" min="0.1"></div>
+      <div><label>蒲松比 ν</label><input id="mfd-nu" type="number" value="0.3" step="0.01" min="0" max="0.49"></div>
+    </div>
+    <div class="row2">
+      <div><label>影響係數 If</label><input id="mfd-If" type="number" value="1.2" step="0.01" min="0.1"></div>
+      <div><label>沉陷計算採用 q_net (kPa)</label><input id="mfd-qNetOverride" type="number" value="0" step="0.1"></div>
+    </div>
+    <label class="inline-check"><input id="mfd-useOverride" type="checkbox">手動覆寫沉陷計算用淨壓力（未勾選時沿用承載力計算值）</label>
+
+    <button class="calc-btn" onclick="calcMFD()">計算筏式基礎承載力與沉陷</button>
+    <div class="note">承載力採一般承載力公式並扣除開挖卸載求淨極限承載力；沉陷採彈性沉陷影響係數法，適合大面積剛性或半剛性筏基之立即沉陷初估。未納入地下水位、分層地層、長期壓密沉陷、非線性土壤行為與相鄰結構影響。</div>
+  </div>
+
+  <div class="card" data-tab="mfd-r">
+    <h2>計算結果</h2>
+    <div id="mfd-result"><p style="color:#888">尚未計算</p></div>
+
+    <div class="subcard">
+      <h3>淨承載力檢核 <span class="tag">Bearing</span></h3>
+      <details class="proc" id="mfd-proc-bearing" style="display:none">
+        <summary>📋 承載力計算過程（供第三方檢核）</summary>
+        <pre id="mfd-proc-bearing-text"></pre>
+      </details>
+    </div>
+
+    <div class="subcard">
+      <h3>彈性沉陷量 <span class="tag">Settlement</span></h3>
+      <details class="proc" id="mfd-proc-settlement" style="display:none">
+        <summary>📋 沉陷計算過程（供第三方檢核）</summary>
+        <pre id="mfd-proc-settlement-text"></pre>
+      </details>
+    </div>
+
+    <button class="pro-btn no-print" onclick="openPro()">📄 產出計算書 PDF</button>
+  </div>
+</div>
+
+</main>
+<script>
+function switchMobTab(name,btn){
+  btn.parentElement.querySelectorAll('.mob-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  btn.parentElement.nextElementSibling.querySelectorAll('.card').forEach(function(c){
+    c.classList.toggle('mob-active',c.dataset.tab===name);
+  });
+}
+function openPro(){JRH.checkEmail(function(){jrhPrint('筏式基礎承載力與沉陷計算書');});}
+function v(id){return parseFloat(document.getElementById(id).value)||0;}
+function f1(x){return Number(x).toFixed(1);}
+function f2(x){return Number(x).toFixed(2);}
+function f3(x){return Number(x).toFixed(3);}
+function f4(x){return Number(x).toFixed(4);}
+function deg2rad(d){return d*Math.PI/180;}
+function isFinitePositive(n){return Number.isFinite(n)&&n>0;}
+
+function calcMFD(){
+  var L=v('mfd-L'), B=v('mfd-B'), Df=v('mfd-Df'), gamma=v('mfd-gamma'), cohesion=v('mfd-c');
+  var phi=v('mfd-phi'), Q=v('mfd-Q'), Es=v('mfd-Es'), nu=v('mfd-nu'), If=v('mfd-If');
+  var shapeMode=document.getElementById('mfd-shapeMode').value;
+  var useOverride=document.getElementById('mfd-useOverride').checked;
+  var qNetOverride=v('mfd-qNetOverride');
+
+  if(!isFinitePositive(L)||!isFinitePositive(B)||!isFinitePositive(Es)){
+    document.getElementById('mfd-result').innerHTML='<p class="ng">L、B、Es 必須大於 0。</p>';
+    return;
+  }
+
+  var area=L*B;
+  var ratioBL=B/L;
+  var phiRad=deg2rad(phi);
+  var tanPhi=Math.tan(phiRad);
+  var Nq=Math.exp(Math.PI*tanPhi)*Math.pow(Math.tan(deg2rad(45)+phiRad/2),2);
+  var Nc=phi>0?(Nq-1)/tanPhi:5.14;
+  var Ngamma=2*(Nq+1)*tanPhi;
+
+  var useShape=(shapeMode==='on')||(shapeMode==='auto'&&phi>10);
+  var sc=useShape?(1+0.2*ratioBL):1;
+  var sq=useShape?(1+0.1*ratioBL):1;
+  var sgamma=useShape?(1+0.1*ratioBL):1;
+
+  var qu=cohesion*Nc*sc + gamma*Df*Nq*sq + 0.5*gamma*B*Ngamma*sgamma;
+  var quNet=qu - gamma*Df;
+  var qNet=Q/area - gamma*Df;
+  var FS=qNet>0?quNet/qNet:NaN;
+  var fsOK=FS>=3;
+
+  var qSettle=useOverride?qNetOverride:qNet;
+  var Si_m=qSettle*B*(1-nu*nu)*If/(Es*1000);
+  var Si_mm=Si_m*1000;
+
+  var settlementSource=useOverride?'手動覆寫':'沿用承載力計算值';
+  var result=document.getElementById('mfd-result');
+  result.innerHTML=
+    '<table><tr><th>項目</th><th>數值</th></tr>'+
+    '<tr><td>基礎面積 A = L×B</td><td>'+f2(area)+' m²</td></tr>'+
+    '<tr><td>承載力係數 Nq</td><td>'+f3(Nq)+'</td></tr>'+
+    '<tr><td>承載力係數 Nc</td><td>'+f3(Nc)+'</td></tr>'+
+    '<tr><td>承載力係數 Nγ</td><td>'+f3(Ngamma)+'</td></tr>'+
+    '<tr><td>極限承載力 qu</td><td>'+f2(qu)+' kPa</td></tr>'+
+    '<tr><td>淨極限承載力 qu_net</td><td>'+f2(quNet)+' kPa</td></tr>'+
+    '<tr><td>淨作用壓力 q_net</td><td>'+f2(qNet)+' kPa</td></tr>'+
+    '<tr><td>安全係數 FS = qu_net/q_net（需≥3.0）</td><td>'+((Number.isFinite(FS))?f2(FS):'--')+' '+(fsOK?'<span class="ok">OK</span>':'<span class="ng">NG</span>')+'</td></tr>'+
+    '<tr><td>沉陷計算採用 q_net</td><td>'+f2(qSettle)+' kPa <span class="mono">('+settlementSource+')</span></td></tr>'+
+    '<tr><td>立即沉陷量 Si</td><td>'+f2(Si_mm)+' mm</td></tr>'+
+    '</table>';
+
+  var p1='';
+  p1+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  p1+='  筏式基礎淨承載力檢核（一般承載力公式 + 開挖卸載）\n';
+  p1+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  p1+='【輸入】\n';
+  p1+='  L='+L+' m, B='+B+' m, Df='+Df+' m, γ='+gamma+' kN/m³\n';
+  p1+='  c='+cohesion+' kPa, φ='+phi+'°, Q='+Q+' kN\n';
+  p1+='  形狀係數模式：'+(useShape?'採用簡化形狀係數':'視為條形基礎，形狀係數=1')+'\n\n';
+  p1+='【一】承載力係數\n';
+  p1+='  tanφ = tan('+phi+'°) = '+f4(tanPhi)+'\n';
+  p1+='  Nq = e^(π×tanφ) × tan²(45+φ/2)\n';
+  p1+='     = e^(π×'+f4(tanPhi)+') × tan²('+(45+phi/2)+'°)\n';
+  p1+='     = '+f3(Nq)+'\n';
+  if(phi>0){
+    p1+='  Nc = (Nq−1)/tanφ = ('+f3(Nq)+'−1)/'+f4(tanPhi)+' = '+f3(Nc)+'\n';
+  }else{
+    p1+='  φ=0°，採黏土簡化 Nc = 5.14\n';
+  }
+  p1+='  Nγ = 2×(Nq+1)×tanφ = 2×('+f3(Nq)+'+1)×'+f4(tanPhi)+' = '+f3(Ngamma)+'\n\n';
+  p1+='【二】形狀係數\n';
+  p1+='  B/L = '+B+'/'+L+' = '+f3(ratioBL)+'\n';
+  p1+='  sc = '+f3(sc)+'\n';
+  p1+='  sq = '+f3(sq)+'\n';
+  p1+='  sγ = '+f3(sgamma)+'\n\n';
+  p1+='【三】極限承載力\n';
+  p1+='  qu = c×Nc×sc + γ×Df×Nq×sq + 0.5×γ×B×Nγ×sγ\n';
+  p1+='     = '+cohesion+'×'+f3(Nc)+'×'+f3(sc)+' + '+gamma+'×'+Df+'×'+f3(Nq)+'×'+f3(sq)+' + 0.5×'+gamma+'×'+B+'×'+f3(Ngamma)+'×'+f3(sgamma)+'\n';
+  p1+='     = '+f2(qu)+' kPa\n\n';
+  p1+='【四】淨承載力與作用壓力\n';
+  p1+='  開挖卸載 = γ×Df = '+gamma+'×'+Df+' = '+f2(gamma*Df)+' kPa\n';
+  p1+='  qu_net = qu − γ×Df = '+f2(qu)+' − '+f2(gamma*Df)+' = '+f2(quNet)+' kPa\n';
+  p1+='  A = L×B = '+L+'×'+B+' = '+f2(area)+' m²\n';
+  p1+='  Q/A = '+Q+'/'+f2(area)+' = '+f2(Q/area)+' kPa\n';
+  p1+='  q_net = Q/(L×B) − γ×Df = '+f2(Q/area)+' − '+f2(gamma*Df)+' = '+f2(qNet)+' kPa\n';
+  if(Number.isFinite(FS)){
+    p1+='  FS = qu_net/q_net = '+f2(quNet)+'/'+f2(qNet)+' = '+f2(FS)+' '+(fsOK?'≥ 3.0 OK':'< 3.0 NG')+'\n';
+  }else{
+    p1+='  q_net ≤ 0，FS 不適用（無正向淨壓力）\n';
+  }
+  p1+='\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+
+  var p2='';
+  p2+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  p2+='  筏式基礎彈性沉陷量（影響係數法）\n';
+  p2+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  p2+='【輸入】\n';
+  p2+='  q_net(採用)='+f2(qSettle)+' kPa ['+settlementSource+']\n';
+  p2+='  B='+B+' m, Es='+Es+' MPa, ν='+nu+', If='+If+'\n\n';
+  p2+='【公式】\n';
+  p2+='  Si(m) = q_net×B×(1−ν²)×If / (Es×1000)\n';
+  p2+='  Si(mm) = Si(m)×1000\n';
+  p2+='  因 Es(MPa) = Es×1000(kPa)，故數值上可直接寫為：\n';
+  p2+='  Si(mm) = q_net×B×(1−ν²)×If / Es\n\n';
+  p2+='【代入】\n';
+  p2+='  (1−ν²) = 1−'+nu+'² = '+f4(1-nu*nu)+'\n';
+  p2+='  Si(mm) = '+f2(qSettle)+'×'+B+'×'+f4(1-nu*nu)+'×'+If+'/'+Es+'\n';
+  p2+='         = '+f2(Si_mm)+' mm\n\n';
+  p2+='【換算檢核】\n';
+  p2+='  Si(m) = '+f2(qSettle)+'×'+B+'×'+f4(1-nu*nu)+'×'+If+'/('+Es+'×1000)\n';
+  p2+='        = '+f5safe(Si_m)+' m\n';
+  p2+='  Si(mm) = '+f5safe(Si_m)+'×1000 = '+f2(Si_mm)+' mm\n';
+  p2+='\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+
+  document.getElementById('mfd-proc-bearing-text').textContent=p1;
+  document.getElementById('mfd-proc-settlement-text').textContent=p2;
+  document.getElementById('mfd-proc-bearing').style.display='';
+  document.getElementById('mfd-proc-settlement').style.display='';
+  if(window.innerWidth<768){
+    var b=document.getElementById('mobTab-mfd-r');
+    if(b){switchMobTab('mfd-r',b);}
+  }
+}
+
+function f5safe(x){
+  if(!Number.isFinite(x)){return '--';}
+  return Number(x).toFixed(5);
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  calcMFD();
+});
+</script>
+<script>
+window.jrhDocMeta={
+  "doc":"筏式基礎承載力與沉陷計算書",
+  "codes":[
+    "Terzaghi / Meyerhof 一般承載力公式（淨壓力法檢核）",
+    "彈性沉陷影響係數法（立即沉陷估算）"
+  ],
+  "notes":[
+    "本工具適用大面積筏式或版式基礎之初步承載力與立即沉陷評估，承載力以淨壓力法扣除開挖卸載後檢核。",
+    "沉陷量採單層等值彈性土體之影響係數法，未考慮分層土層、地下水位變化、非線性應變軟化、長期壓密與蠕變效應。",
+    "承載力係數 Nq、Nc、Nγ 依輸入摩擦角以簡化公式計算；形狀係數可依設定選擇是否納入，正式設計應依採用規範與工址條件複核。",
+    "本工具未納入偏心荷載、傾斜荷載、地震力、浮力、沖刷與鄰近開挖等影響，遇特殊條件應另行詳細分析。",
+    "列印之計算書僅供方案比較與初步設計參考，正式送審前仍應由合格大地/結構工程專業人員複核。"
+  ]
+};
+</script>
+</body>
+</html>
